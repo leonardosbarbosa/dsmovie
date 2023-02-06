@@ -19,14 +19,38 @@ public class MovieService {
 	@Transactional(readOnly = true)
 	public Page<MovieDTO> findAllMovies(Pageable pageable){
 		Page<Movie> result = repository.findAll(pageable);
-		Page<MovieDTO> page = result.map(x -> new MovieDTO(x));
-		return page;
+		return result.map(MovieDTO::new);
 	}
 	
 	@Transactional(readOnly = true)
 	public MovieDTO findMovieById(Long id){
 		Movie result = repository.findById(id).get();
-		MovieDTO dto = new MovieDTO(result);
-		return dto;
+		return new MovieDTO(result);
+	}
+
+	@Transactional
+	public MovieDTO insert(MovieDTO dto) {
+		Movie entity = dto.toEntity();
+		entity = repository.save(entity);
+		return new MovieDTO(entity);
+	}
+
+	@Transactional
+	public MovieDTO update(Long id, MovieDTO dto) {
+		Movie entity = repository.getById(id);
+		updateData(entity, dto);
+		entity = repository.save(entity);
+		return new MovieDTO(entity);
+	}
+
+	public void delete(Long id) {
+		repository.deleteById(id);
+	}
+
+	private void updateData(Movie entity, MovieDTO dto) {
+		entity.setTitle(dto.getTitle());
+		entity.setScore(dto.getScore());
+		entity.setCount(dto.getCount());
+		entity.setImage(dto.getImage());
 	}
 }
